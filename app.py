@@ -1,5 +1,4 @@
 import dash
-from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import dash_bio as dashbio
@@ -33,14 +32,13 @@ dt_cols = utils.getTableColumns()
 tryptamine_table = utils.createTable(df, dt_cols)
 
 page_title = [
-    html.H1('Molecular Explorer', className='text-center')
+    html.H1('Molecular Explorer', className='text-center display-2')
 ]
 
 page_info = dbc.Card(
     'Use the tabs to explore different molecules in the base classes Tryptamines, Phenetylamines and Lysergamides. Click to select a molecule from the table to interactively explore its 3D molecular structure and known synonyms.',
     body=True,
-    class_name='text-white bg-primary border mt-2 fst-italic overflow-auto',
-    style={'maxWidth': '90vw', 'maxHeight': '10vh'}
+    class_name='text-white bg-primary border mt-2 fst-italic overflow-auto'
 )
 
 molecule_speck_view_toggle = html.Div([
@@ -69,21 +67,21 @@ molecule_speck_view = html.Div([
 molecule_3d_viewer = [
     dbc.Card(
         dbc.CardBody([
-            html.H4('3D Viewer', className='card-title text-center'),
+            html.H3('3D Viewer', className='card-title text-center'),
             html.H5(id='molecule-speck-title',  className='card-text text-center fst-italic'),
             molecule_speck_view_toggle,
             molecule_speck_view,
         ]),
         class_name='mt-2 border overflow-hidden',
-        style={'maxHeight': '40vh', 'maxWidth': '20vw', 'minWidth': '10vw'}
+        style={'maxHeight': '40vh'}
     ),
     dbc.Card(
         dbc.CardBody([
             html.H4('Synonyms', className='card-title text-center'),
-            html.Ul(id='molecule-synonyms', className='card-text text-wrap fs-6', style={'maxWidth': '20vw'})
+            html.Ul(id='molecule-synonyms', className='card-text text-wrap fs-6')
         ]),
         class_name='mt-2 border overflow-auto',
-        style={'maxHeight': '30vh', 'maxWidth': '20vw', 'minWidth': '10vw'}
+        style={'maxHeight': '30vh'}
     )
 ]
 
@@ -127,10 +125,10 @@ molecule_table_section = dbc.Card(
         molecule_table_tabs
     ]),
     class_name='mt-2 border overflow-auto',
-    style={'maxHeight': '85vh', 'maxWidth': '70vw'}
+    style={'maxHeight': '85vh'}
 )
 
-app.layout = dbc.Container(fluid=True, children=[
+app.layout = dbc.Container(fluid=True, class_name='container-md', children=[
     dbc.Row(
         [
             dbc.Col(page_title, width='auto')
@@ -151,12 +149,16 @@ app.layout = dbc.Container(fluid=True, children=[
         [
             dbc.Col(
                 molecule_3d_viewer,
-                width='auto',
+                lg=3,
+                md=12,
+                xs=12,
                 class_name='g-2'
             ),
             dbc.Col(
                 molecule_table_section,
-                width='auto',
+                lg=9,
+                md=12,
+                xs=12,
                 class_name='g-2'
             ),
         ],

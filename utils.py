@@ -182,7 +182,6 @@ def createDataFrame(mol_ids):
     for j in jsons:
         data['pubchem_id'].append(j['pubchem_id'])
         data['pubchem_url'].append(j['pubchem_url'])
-        #data['pubchem_link'].append('<p style="text-align: center;"><a href="' + j['pubchem_url'] + '" target="_blank">' + j['pubchem_id'] + '</a></p>')
         data['pubchem_link'].append(dcc.Link(href=j['pubchem_url'], children=j['pubchem_id'], target='_blank', className='link-info'))
         data['name'].append(j['name'])
         data['class'].append(j['class'])
@@ -197,7 +196,6 @@ def createDataFrame(mol_ids):
         data['bond_count'].append(j['bond_count'])
         data['mol_weight'].append(j['mol_weight'] + ' ' + j['mol_weight_unit'])
         data['xyz'].append(j['xyz'])
-        #data['img'].append("<img src='data:image/png;base64," + j['img'] + "' class='img-fluid'>")
         data['img'].append(html.Img(className='img-fluid pe-0', src='data:image/png;base64,' + j['img'], style={'maxWidth': '8vw'}))
         data['img_b64'].append(j['img'])
 
@@ -248,7 +246,7 @@ def createTable(df, cols):
     for i in df.index:
         rows.append(
             html.Tr(
-                [html.Td(df.loc[i, c], className='text-wrap', style={'maxWidth': '8vw'}) for c in cols],
+                [html.Td(df.loc[i, c], className='text-wrap small', style={'maxWidth': '8vw'}) for c in cols],
                 id='row-{}'.format(str(i)),
                 className='fs-6'
             )
