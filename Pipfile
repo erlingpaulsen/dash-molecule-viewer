@@ -10,7 +10,7 @@ dash-bio = "*"
 dash-bio-utils = "*"
 periodictable = "*"
 dash-bootstrap-components = "*"
-dash-vtk = "*"
+dash-table = "*"
 
 [dev-packages]
 

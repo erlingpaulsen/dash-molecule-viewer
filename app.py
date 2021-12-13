@@ -3,22 +3,18 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import dash_bio as dashbio
-from dash_bio_utils import xyz_reader
 import dash_bootstrap_components as dbc
-import json
-import base64
+import utils
 
 MOLECULE_ID_FILE = 'data/molecule_ids'
-JSON_PATH = 'data/json/'
-IMG_PATH = 'data/img/'
 
-FULL = 12
-HALF = 6
-THIRD = 4
-FOURTH = 3
-SIXTH = 2
-
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.DARKLY],
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, height=device-height, initial-scale=1"}
+    ]
+)
 server = app.server
 
 '''--------------------------------------------------------
@@ -32,103 +28,167 @@ with open(MOLECULE_ID_FILE, 'r') as file:
 '''--------------------------------------------------------
           LOADING DATA AND BUILDING LAYOUT
 --------------------------------------------------------'''
-molecule_list_table_rows = []
-molecule_speck = []
-molecule_view_button_group = html.Div([
-    dbc.RadioItems(
-        id="molecule-speck-preset-views",
-        className="btn-group",
-        inputClassName="btn-check",
-        labelClassName="btn btn-outline-primary",
-        labelCheckedClassName="active",
-        options=[
-            {'label': 'Ball and stick', 'value': 'stickball'},
-            {'label': 'Default', 'value': 'default'}
-        ],
-        value='stickball',
-    )],
-    className="radio-group",
+df = utils.createDataFrame(mol_ids)
+dt_cols = utils.getTableColumns()
+tryptamine_table = utils.createTable(df, dt_cols)
+
+page_title = [
+    html.H1('Molecular Explorer', className='text-center')
+]
+
+page_info = dbc.Card(
+    'Select a molecule from the table to interacively explore its 3D molecular structure and known synonyms. The information is based on data fetched from PubChem.',
+    body=True,
+    class_name='bg-transparent border-0 mt-2 fst-italic'
 )
 
-for i, mol_id in enumerate(mol_ids):
-    json_filename = '{0}.json'.format(mol_id)
-    img_filename = '{0}.png'.format(mol_id)
-    encoded_image = base64.b64encode(open(IMG_PATH + img_filename, 'rb').read())
-    with open(JSON_PATH + json_filename, 'r') as f:
-        json_file = json.load(f)
-        xyz_data = xyz_reader.read_xyz(datapath_or_datastring=json_file['xyz'], is_datafile=False)
-        molecule_list_table_row = html.Tr([
-            html.Td(dcc.Link(json_file['pubchem_id'], href=json_file['pubchem_url'], target='_blank')),
-            html.Td(json_file['name']),
-            html.Td(json_file['formula']),
-            html.Td(json_file['atom_count']),
-            html.Td(json_file['bond_count']),
-            html.Td(json_file['mol_weight']),
-            html.Td(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())))
-        ])
-        molecule_list_table_rows.append(molecule_list_table_row)
-
-        if i == 0:
-            molecule_speck.append(html.H4(json_file['name'], style={'textAlign': 'center'}))
-            molecule_speck.append(molecule_view_button_group)
-            molecule_speck.append(dashbio.Speck(
-                id='molecule-speck',
-                data=xyz_data,
-                view={
-                    'resolution': 700,
-                    'brightness': 0.45,
-                    'ao': 0.75,
-                    'aoRes': 1,
-                    'outline': 0,
-                    'atomScale': 0.2,
-                    'relativeAtomScale': 0.7,
-                    'bonds': True,
-                    'zoom': 0.1
-                }
-            ))
-
-title = dbc.Col(html.H1('Molecular Explorer', style={'textAlign': 'center'}), width=FULL)
-sub_titles = [
-    dbc.Col(html.H3('List of Molecules', style={'textAlign': 'center'}), width=HALF),
-    dbc.Col(html.H3('3D Viewer', style={'textAlign': 'center'}), width=HALF)
-]
-molecule_list_table_header = [html.Thead(html.Tr([
-    html.Th('PubChem ID'),
-    html.Th('Name'),
-    html.Th('Formula'),
-    html.Th('Atom Count'),
-    html.Th('Bond Count'),
-    html.Th('Molecular Weight'),
-    html.Th('2D Skeletal')
-]))]
-molecule_list_table_body = [html.Tbody(molecule_list_table_rows)]
-molecule_list_table = dbc.Table(molecule_list_table_header + molecule_list_table_body, bordered=True, hover=True)
-
-app.layout = dbc.Container(fluid=True, children=[
-    dbc.Row(title, justify='center', align='center'),
-    dbc.Row(sub_titles, justify='center', align='center'),
-    dbc.Row([
-        dbc.Col(molecule_speck, width=HALF),
-        dbc.Col(molecule_list_table, width=HALF)
-    ])
+molecule_speck_view_toggle = html.Div([
+    dbc.Checklist(
+        options=[
+            {'label': 'Toggle view', 'value': 1}
+        ],
+        value=[1],
+        id="molecule-speck-preset-views",
+        switch=True,
+        label_class_name='fs-6'
+    )
 ])
 
-
-
-'''@app.callback(
-    Output(component_id='my-output', component_property='children'),
-    Input(component_id='my-input', component_property='value')
+molecule_speck_view = html.Div([
+    dashbio.Speck(
+        id='molecule-speck',
+        view={
+            'resolution': 350,
+            'zoom': 0.085
+        }
+    )],
+    className='overflow-hidden p-0 m-0'
 )
-def update_3d_viewer(input_value):
-    return 'Output: {}'.format(input_value)'''
 
+molecule_3d_viewer = [
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('3D Viewer', className='card-title text-center'),
+            html.H5(id='molecule-speck-title',  className='card-text text-center fst-italic'),
+            molecule_speck_view_toggle,
+            molecule_speck_view,
+        ]),
+        class_name='mt-2 border overflow-hidden',
+        style={'maxHeight': '40vh', 'maxWidth': '20vw', 'minWidth': '10vw'}
+    ),
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Synonyms', className='card-title text-center'),
+            html.Ul(id='molecule-synonyms', className='card-text text-wrap fs-6', style={'maxWidth': '20vw'})
+        ]),
+        class_name='mt-2 border overflow-auto',
+        style={'maxHeight': '30vh', 'maxWidth': '20vw', 'minWidth': '10vw'}
+    )
+]
+
+tryptamines = [
+    dbc.Card(
+        dbc.Row(
+            [
+                dbc.Col([
+                    dbc.CardBody([
+                        html.H4('Tryptamines', className='card-title'),
+                        html.P('Tryptamines are a group of monoamine alkaloids (indolalkylamines), derived from the amino acid tryptophan, that can be found in natural sources including plants, fungi, microbes, and amphibia', className='card-text'),
+                    ])
+                ], xs=6, md=6, lg=8),
+                dbc.Col([
+                    dbc.CardImg(
+                        src='data:image/png;base64,' + df[df['name'] == 'Tryptamine']['img_b64'],
+                        class_name='img-fluid rounded-end'
+                    )
+                ], xs=6, md=5, lg=3)
+            ],
+            justify='start'
+        )
+    ),
+    html.Div([
+            tryptamine_table
+        ],
+    )
+]
+
+molecule_table_tabs = dbc.Tabs(
+    [
+        dbc.Tab(tryptamines, label='Tryptamines'),
+        dbc.Tab('test', label='Phenetylamines', disabled=True),
+        dbc.Tab('test2', label='Lysergamides', disabled=True),
+    ]
+)
+
+molecule_table_section = dbc.Card(
+    dbc.CardBody([
+        html.P('Base Classes', className='card-title text-center h3'),
+        molecule_table_tabs
+    ]),
+    class_name='mt-2 border overflow-auto',
+    style={'maxHeight': '85vh', 'maxWidth': '70vw'}
+)
+
+app.layout = dbc.Container(fluid=True, children=[
+    dbc.Row(
+        [
+            dbc.Col(page_title, width='auto')
+        ],
+        justify='center',
+        align='center',
+        class_name='g-2'
+    ),
+    dbc.Row(
+        [
+            dbc.Col(page_info, width='auto')
+        ],
+        justify='center',
+        align='center',
+        class_name='g-2'
+    ),
+    dbc.Row(
+        [
+            dbc.Col(
+                molecule_3d_viewer,
+                width='auto',
+                class_name='g-2'
+            ),
+            dbc.Col(
+                molecule_table_section,
+                width='auto',
+                class_name='g-2'
+            ),
+        ],
+        class_name='g-2',
+        justify='center'
+    )
+])
+
+@app.callback(
+    Output('molecule-speck-title', 'children'),
+    Output('molecule-speck', 'data'),
+    Output('molecule-synonyms', 'children'),
+    [Input('row-{}'.format(str(i)), 'n_clicks') for i in df.index]
+)
+def update_speck_data(*clicks):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        i = 0
+    else:
+        row_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        i = int(row_id.split('-')[-1])
+    return df.loc[i, 'name'], df.loc[i, 'xyz'], [html.Li(s) for s in df.loc[i, 'synonyms']]
 
 @app.callback(
     Output('molecule-speck', 'presetView'),
     Input('molecule-speck-preset-views', 'value')
 )
-def update_speck_view(preset_name):
-    return preset_name
+def update_speck_view(v):
+    if len(v) > 0:
+        return 'stickball'
+    else:
+        return 'default'
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
