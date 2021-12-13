@@ -37,9 +37,10 @@ page_title = [
 ]
 
 page_info = dbc.Card(
-    'Select a molecule from the table to interacively explore its 3D molecular structure and known synonyms. The information is based on data fetched from PubChem.',
+    'Use the tabs to explore different molecules in the base classes Tryptamines, Phenetylamines and Lysergamides. Click to select a molecule from the table to interactively explore its 3D molecular structure and known synonyms.',
     body=True,
-    class_name='bg-transparent border-0 mt-2 fst-italic'
+    class_name='text-white bg-primary border mt-2 fst-italic overflow-auto',
+    style={'maxWidth': '90vw', 'maxHeight': '10vh'}
 )
 
 molecule_speck_view_toggle = html.Div([
@@ -58,7 +59,7 @@ molecule_speck_view = html.Div([
     dashbio.Speck(
         id='molecule-speck',
         view={
-            'resolution': 350,
+            'resolution': 300,
             'zoom': 0.085
         }
     )],
