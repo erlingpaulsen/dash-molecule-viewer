@@ -73,7 +73,7 @@ molecule_3d_viewer = [
             molecule_speck_view,
         ]),
         class_name='mt-2 border overflow-hidden',
-        style={'maxHeight': '40vh'}
+        #style={'maxHeight': '40vh'}
     ),
     dbc.Card(
         dbc.CardBody([
@@ -81,7 +81,7 @@ molecule_3d_viewer = [
             html.Ul(id='molecule-synonyms', className='card-text text-wrap fs-6')
         ]),
         class_name='mt-2 border overflow-auto',
-        style={'maxHeight': '30vh'}
+        style={'maxHeight': '50.5vh'}
     )
 ]
 
@@ -94,15 +94,15 @@ tryptamines = [
                         html.H4('Tryptamines', className='card-title'),
                         html.P('Tryptamines are a group of monoamine alkaloids (indolalkylamines), derived from the amino acid tryptophan, that can be found in natural sources including plants, fungi, microbes, and amphibia', className='card-text'),
                     ])
-                ], xs=6, md=6, lg=8),
+                ], xs=12, md=7, lg=8),
                 dbc.Col([
                     dbc.CardImg(
                         src='data:image/png;base64,' + df[df['name'] == 'Tryptamine']['img_b64'],
                         class_name='img-fluid rounded-end'
                     )
-                ], xs=6, md=5, lg=3)
+                ], xs=6, md=5, lg=4)
             ],
-            justify='start'
+            justify='center'
         )
     ),
     html.Div([
