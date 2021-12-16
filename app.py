@@ -128,7 +128,7 @@ molecule_table_section = dbc.Card(
     style={'maxHeight': '85vh'}
 )
 
-app.layout = dbc.Container(fluid=True, class_name='container-md', children=[
+app.layout = dbc.Container(fluid=True, class_name='container-sm', children=[
     dbc.Row(
         [
             dbc.Col(page_title, width='auto')
@@ -149,15 +149,15 @@ app.layout = dbc.Container(fluid=True, class_name='container-md', children=[
         [
             dbc.Col(
                 molecule_3d_viewer,
-                lg=3,
-                md=12,
+                xl=3,
+                lg=4,
                 xs=12,
                 class_name='g-2'
             ),
             dbc.Col(
                 molecule_table_section,
-                lg=9,
-                md=12,
+                xl=9,
+                lg=8,
                 xs=12,
                 class_name='g-2'
             ),

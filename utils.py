@@ -240,7 +240,7 @@ def getPrettyName(name):
 
 def createTable(df, cols):
     table_header = [
-        html.Thead(html.Tr([html.Th(getPrettyName(c)) for c in cols], className='fs-6 bold text-wrap table-primary'))
+        html.Thead(html.Tr([html.Th(getPrettyName(c)) for c in cols], className='small bold text-wrap table-primary'))
     ]
     rows = []
     for i in df.index:
